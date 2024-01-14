@@ -13,6 +13,8 @@ import {
   WorkspaceConfiguration,
   WorkspaceEdit,
 } from 'vscode';
+
+import { getTsdk } from '@volar/vscode';
 import { Disposable, LanguageClient, ServerOptions } from 'vscode-languageclient/node.js';
 import type { Request, GetIRRequest, SortImportsRequest } from '@glint/core/lsp-messages';
 
@@ -34,15 +36,15 @@ export function activate(context: ExtensionContext): void {
     commands.registerTextEditorCommand('glint.show-debug-ir', showDebugIR)
   );
 
-  workspace.workspaceFolders?.forEach((folder) => addWorkspaceFolder(folder, fileWatcher));
+  workspace.workspaceFolders?.forEach((folder) => addWorkspaceFolder(context, folder, fileWatcher));
   workspace.onDidChangeWorkspaceFolders(({ added, removed }) => {
-    added.forEach((folder) => addWorkspaceFolder(folder, fileWatcher));
+    added.forEach((folder) => addWorkspaceFolder(context, folder, fileWatcher));
     removed.forEach((folder) => removeWorkspaceFolder(folder));
   });
 
   workspace.onDidChangeConfiguration((changeEvent) => {
     if (changeEvent.affectsConfiguration('glint.libraryPath')) {
-      reloadAllWorkspaces(fileWatcher);
+      reloadAllWorkspaces(context, fileWatcher);
     }
   });
 }
@@ -117,18 +119,19 @@ async function showDebugIR(editor: TextEditor): Promise<void> {
 ///////////////////////////////////////////////////////////////////////////////
 // Workspace folder management
 
-async function reloadAllWorkspaces(fileWatcher: FileSystemWatcher): Promise<void> {
+async function reloadAllWorkspaces(context: ExtensionContext, fileWatcher: FileSystemWatcher): Promise<void> {
   let folders = workspace.workspaceFolders ?? [];
 
   await Promise.all(
     folders.map(async (folder) => {
       await removeWorkspaceFolder(folder);
-      await addWorkspaceFolder(folder, fileWatcher);
+      await addWorkspaceFolder(context, folder, fileWatcher);
     })
   );
 }
 
 async function addWorkspaceFolder(
+  context: ExtensionContext,
   workspaceFolder: WorkspaceFolder,
   watcher: FileSystemWatcher
 ): Promise<void> {
@@ -162,6 +165,7 @@ async function addWorkspaceFolder(
       typescript: {
         format: typescriptFormatOptions,
         preferences: typescriptUserPreferences,
+        tsdk: (await getTsdk(context)).tsdk,
       },
     },
     documentSelector: [{ scheme: 'file', pattern: `${folderPath}/${filePattern}` }],
