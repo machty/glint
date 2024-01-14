@@ -202,6 +202,9 @@ export function bindLanguageServerPool({ connection, pool, openDocuments }: Bind
     });
   });
 
+  // VSCode will fire this on for: 
+  // ['.js', '.ts', '.gjs', '.gts', '.hbs'];
+  // ('**/{ts,js}config*.json');
   connection.onDidChangeWatchedFiles(({ changes }) => {
     pool.forEachServer(({ server, scheduleDiagnostics }) => {
       for (let change of changes) {
