@@ -15,8 +15,5 @@
     "declaration": true,
     "sourceMap": true,
     "types": [],
-
-    // new
-    "allowSyntheticDefaultImports": true,
   }
 }

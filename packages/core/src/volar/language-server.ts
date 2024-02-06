@@ -1,14 +1,5 @@
 #!/usr/bin/env node
 
-/**
- * @typedef {import('@mdx-js/language-service').Commands} Commands
- * @typedef {import('unified').PluggableList} PluggableList
- * @typedef {import('unified').Plugin} Plugin
- */
-
-import * as path from 'path';
-import * as assert from 'assert';
-
 // import {
 //   createMdxLanguagePlugin,
 //   createMdxServicePlugin,
@@ -25,11 +16,13 @@ import {
 // import {create as createMarkdownServicePlugin} from 'volar-service-markdown'
 import { create as createTypeScriptServicePlugin } from 'volar-service-typescript';
 import { createGtsServicePlugin } from './gts-service-plugin.js';
+import { createGtsLanguagePlugin } from './gts-language-plugin.js';
+import { assert } from '../transform/util.js';
 
 // process.title = 'mdx-language-server'
 
 /** @type {PluggableList} */
-const defaultPlugins = [[remarkFrontmatter, ['toml', 'yaml']], remarkGfm];
+// const defaultPlugins = [[remarkFrontmatter, ['toml', 'yaml']], remarkGfm];
 const connection = createConnection();
 const server = createServer(connection);
 
@@ -58,7 +51,7 @@ connection.onInitialize((parameters) =>
       const ts = server.modules.typescript;
       assert(ts, 'TypeScript module is missing');
 
-      const configFileName = projectContext?.typescript?.configFileName;
+      // const configFileName = projectContext?.typescript?.configFileName;
 
       // /** @type {PluggableList | undefined} */
       // let plugins
@@ -89,7 +82,7 @@ connection.onInitialize((parameters) =>
       //   jsxImportSource = commandLine.options.jsxImportSource || jsxImportSource
       // }
 
-      return [createMdxLanguagePlugin(plugins || defaultPlugins, checkMdx, jsxImportSource)];
+      return [createGtsLanguagePlugin()];
     },
   })
 );

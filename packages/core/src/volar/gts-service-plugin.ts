@@ -23,8 +23,8 @@
 // import {fromPlace} from 'unist-util-lsp'
 // import {URI, Utils} from 'vscode-uri'
 // import {createSyntaxToggle} from './commands.js'
-// import {VirtualMdxCode} from './virtual-code.js'
-import { ServicePlugin, ServicePluginInstance } from '@volar/language-service'
+// import {VirtualGtsCode} from './virtual-code.js'
+import { ServicePlugin, ServicePluginInstance } from '@volar/language-service';
 
 /**
  * Create an Volar service plugin for .gts files.
@@ -60,7 +60,7 @@ export function createGtsServicePlugin(): ServicePlugin {
         // async provideDocumentDropEdits(document, position, dataTransfer) { },
 
         // provideSemanticDiagnostics(document) { }
-      }
-    }
-  }
+      };
+    },
+  };
 }
