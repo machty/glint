@@ -5,7 +5,6 @@ import {
   createTypeScriptProjectProvider,
 } from '@volar/language-server/node.js';
 
-
 import { ServerProject, ServicePlugin } from '@volar/language-server';
 // import * as vue2 from '@vue/language-core';
 // import { VueCompilerOptions } from '@vue/language-core';
@@ -22,6 +21,7 @@ import { ServerProject, ServicePlugin } from '@volar/language-server';
 // import { VueInitializationOptions } from './types';
 import { createSys } from '@volar/typescript';
 import { assert } from '../cli/utils/assert.js';
+import { createGtsServicePlugin } from '../volar/gts-service-plugin.js';
 
 // import { create as createVueService } from './plugins/vue';
 
@@ -32,9 +32,7 @@ const server = createServer(connection);
 
 connection.listen();
 
-type InitializationOptions = {
-
-}
+type InitializationOptions = {};
 
 connection.onInitialize((params) => {
   const options: InitializationOptions = params.initializationOptions;
@@ -73,7 +71,7 @@ connection.onInitialize((params) => {
 
         // return Object.values(services);
 
-	      const services: Record<string, ServicePlugin> = {};
+        const services: Record<string, ServicePlugin> = {};
 
         // services['gts'] = {
 
@@ -82,70 +80,63 @@ connection.onInitialize((params) => {
         return [];
       },
       async getLanguagePlugins(serviceEnv, projectContext) {
-        const ts = server.modules.typescript
-        assert(ts, 'TypeScript module is missing')
-  
-        return [
-          createGtsServicePlugin(),
-        ]
-  
+        const ts = server.modules.typescript;
+        assert(ts, 'TypeScript module is missing');
 
-        // return LanguagePlugin<VirtualCode<string>>[]
-        // so we want to return language plugin
-        return [];
+        return [createGtsServicePlugin()];
 
-      //   const ts = getTsLib();
-      //   const [commandLine, vueOptions] = await parseCommandLine();
-      //   const resolvedVueOptions = vue.resolveVueCompilerOptions(vueOptions);
-      //   const languages = vue.resolveLanguages(
-      //     {},
-      //     ts,
-      //     commandLine?.options ?? {},
-      //     resolvedVueOptions,
-      //     options.codegenStack
-      //   );
+        //   const ts = getTsLib();
+        //   const [commandLine, vueOptions] = await parseCommandLine();
+        //   const resolvedVueOptions = vue.resolveVueCompilerOptions(vueOptions);
+        //   const languages = vue.resolveLanguages(
+        //     {},
+        //     ts,
+        //     commandLine?.options ?? {},
+        //     resolvedVueOptions,
+        //     options.codegenStack
+        //   );
 
-      //   envToVueOptions.set(serviceEnv, resolvedVueOptions);
+        //   envToVueOptions.set(serviceEnv, resolvedVueOptions);
 
-      //   return Object.values(languages);
+        //   return Object.values(languages);
 
-      //   async function parseCommandLine() {
-      //     let commandLine: vue2.ParsedCommandLine | undefined;
-      //     let vueOptions: Partial<vue.VueCompilerOptions> = {};
+        //   async function parseCommandLine() {
+        //     let commandLine: vue2.ParsedCommandLine | undefined;
+        //     let vueOptions: Partial<vue.VueCompilerOptions> = {};
 
-      //     if (projectContext.typescript) {
-      //       const sys = createSys(
-      //         ts,
-      //         serviceEnv,
-      //         serviceEnv.uriToFileName(serviceEnv.workspaceFolder.toString())
-      //       );
-      //       let sysVersion: number | undefined;
-      //       let newSysVersion = await sys.sync();
+        //     if (projectContext.typescript) {
+        //       const sys = createSys(
+        //         ts,
+        //         serviceEnv,
+        //         serviceEnv.uriToFileName(serviceEnv.workspaceFolder.toString())
+        //       );
+        //       let sysVersion: number | undefined;
+        //       let newSysVersion = await sys.sync();
 
-      //       while (sysVersion !== newSysVersion) {
-      //         sysVersion = newSysVersion;
-      //         if (projectContext.typescript.configFileName) {
-      //           commandLine = vue2.createParsedCommandLine(
-      //             ts,
-      //             sys,
-      //             projectContext.typescript.configFileName
-      //           );
-      //         }
-      //         newSysVersion = await sys.sync();
-      //       }
-      //     }
+        //       while (sysVersion !== newSysVersion) {
+        //         sysVersion = newSysVersion;
+        //         if (projectContext.typescript.configFileName) {
+        //           commandLine = vue2.createParsedCommandLine(
+        //             ts,
+        //             sys,
+        //             projectContext.typescript.configFileName
+        //           );
+        //         }
+        //         newSysVersion = await sys.sync();
+        //       }
+        //     }
 
-      //     if (commandLine) {
-      //       vueOptions = commandLine.vueOptions;
-      //     }
-      //     vueOptions.extensions = [
-      //       ...(vueOptions.extensions ?? ['.vue']),
-      //       ...glintFileExtensions.map((ext) => '.' + ext),
-      //     ];
-      //     vueOptions.extensions = [...new Set(vueOptions.extensions)];
+        //     if (commandLine) {
+        //       vueOptions = commandLine.vueOptions;
+        //     }
+        //     vueOptions.extensions = [
+        //       ...(vueOptions.extensions ?? ['.vue']),
+        //       ...glintFileExtensions.map((ext) => '.' + ext),
+        //     ];
+        //     vueOptions.extensions = [...new Set(vueOptions.extensions)];
 
-      //     return [commandLine, vueOptions] as const;
-      //   }
+        //     return [commandLine, vueOptions] as const;
+        //   }
       },
     }
   );
