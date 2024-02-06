@@ -15,7 +15,7 @@
     "declaration": true,
     "sourceMap": true,
     "types": ["@types/node"],
-
+    
     // new
     "allowSyntheticDefaultImports": true,
   }
