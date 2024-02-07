@@ -28,10 +28,10 @@ export function createGtsLanguagePlugin(): LanguagePlugin {
         // TODO: not sure what to return here for gts
         // i THINK this is where we return the Intermediate Representation .ts file
         return {
-          code: rootVirtualCode.embeddedCodes[0],
+          code: rootVirtualCode, // .embeddedCodes[0],
           extension: '.gts',
-          // scriptKind: ts.ScriptKind.DEFERRED,
-          scriptKind: 7,
+          // scriptKind: 7, // DEFERRED
+          scriptKind: 3, // TS
         };
       },
 
