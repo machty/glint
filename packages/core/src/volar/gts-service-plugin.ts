@@ -37,7 +37,7 @@ import { ServicePlugin, ServicePluginInstance } from '@volar/language-service';
  */
 export function createGtsServicePlugin(): ServicePlugin {
   return {
-    name: 'gts',
+    name: 'glimmer-ts-service',
 
     /**
      * @returns {ServicePluginInstance}

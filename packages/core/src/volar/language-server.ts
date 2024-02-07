@@ -40,9 +40,21 @@ connection.onInitialize((parameters) =>
 
       // What is the difference between a createMdxServicePlugin and a createMdxLanguagePlugin?
 
+      // Example of how these are used:
+      // When requesting completions from the server, Volar loops through each service (in provideCompletionItems.ts)
+      // to see if it defines `provideCompletionItems`. If so, it calls that hook and returns the results.
+      //
+      // In our case, the GTS service, i think, should not provide TS completions; rather, the TS service should provide
+      // TS completions for the Immediate Representation of the GTS file.
+      //
+      // Services only operate on a single language; a .gts file is actually a file type with two embedded languages: TS + Handlebars.
+      // So the way to think about it is we use the GTS LanguagePlugin to parse the .gts file into a VirtualGtsCode
       return [
-        // createMarkdownServicePlugin({configurationSection: 'mdx.validate'}),
-        createGtsServicePlugin(),
+        // Disabling GTS service for now because for the purposes of type-checking, I don't
+        // thing we need to use the GTS service; rather, we use the GTS language plugin to parse
+        // out the embedded codes, generate a TS IR file, and then use the pre-existing TS language
+        // service to parse that.
+        // createGtsServicePlugin(),
         createTypeScriptServicePlugin(server.modules.typescript),
       ];
     },

@@ -2,15 +2,20 @@
  * @typedef {import('typescript').IScriptSnapshot} IScriptSnapshot
  */
 
+import { IScriptSnapshot, TextChangeRange } from "typescript";
+
 /**
  * A TypeScript compatible script snapshot that wraps a string of text.
  *
  * @implements {IScriptSnapshot}
  */
-export class ScriptSnapshot {
+export class ScriptSnapshot implements IScriptSnapshot {
   constructor(public text: string) {}
 
-  getChangeRange() {}
+  // Not Implemented
+  getChangeRange(_oldSnapshot: IScriptSnapshot): TextChangeRange | undefined {
+    return undefined;
+  }
 
   getLength() {
     return this.text.length;

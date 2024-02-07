@@ -10,7 +10,7 @@ import { VirtualGtsCode } from './gts-virtual-code.js';
 export function createGtsLanguagePlugin(): LanguagePlugin {
   return {
     createVirtualCode(fileId, languageId, snapshot) {
-      if (languageId === 'gts') {
+      if (languageId === 'glimmer-ts') {
         return new VirtualGtsCode(snapshot);
       }
     },
@@ -24,13 +24,10 @@ export function createGtsLanguagePlugin(): LanguagePlugin {
       extraFileExtensions: [{ extension: 'gts', isMixedContent: true, scriptKind: 7 }],
 
       getScript(rootVirtualCode) {
-        let virtualGtsCode = rootVirtualCode as VirtualGtsCode;
-        // TODO: not sure what to return here for gts
-        // i THINK this is where we return the Intermediate Representation .ts file
         return {
-          code: rootVirtualCode, // .embeddedCodes[0],
-          extension: '.gts',
-          // scriptKind: 7, // DEFERRED
+          // hacky: assuming that the first embeddedCode is TS IR
+          code: rootVirtualCode.embeddedCodes[0],
+          extension: '.ts',
           scriptKind: 3, // TS
         };
       },
