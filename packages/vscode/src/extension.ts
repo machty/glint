@@ -13,8 +13,15 @@ import {
   WorkspaceConfiguration,
   WorkspaceEdit,
 } from 'vscode';
+import * as languageServerProtocol from '@volar/language-server/protocol.js';
+import {
+  activateAutoInsertion,
+  activateDocumentDropEdit,
+  activateTsVersionStatusItem,
+  createLabsInfo,
+  getTsdk,
+} from '@volar/vscode';
 
-import { getTsdk } from '@volar/vscode';
 import { Disposable, LanguageClient, ServerOptions } from 'vscode-languageclient/node.js';
 import type { Request, GetIRRequest, SortImportsRequest } from '@glint/core/lsp-messages';
 
@@ -26,7 +33,7 @@ const clients = new Map<string, LanguageClient>();
 const extensions = ['.js', '.ts', '.gjs', '.gts', '.hbs'];
 const filePattern = `**/*{${extensions.join(',')}}`;
 
-export function activate(context: ExtensionContext): void {
+export function activate(context: ExtensionContext) {
   let fileWatcher = workspace.createFileSystemWatcher(filePattern);
 
   context.subscriptions.push(fileWatcher, createConfigWatcher());
@@ -36,7 +43,12 @@ export function activate(context: ExtensionContext): void {
     commands.registerTextEditorCommand('glint.show-debug-ir', showDebugIR)
   );
 
-  workspace.workspaceFolders?.forEach((folder) => addWorkspaceFolder(context, folder, fileWatcher));
+  // TODO: how to each multiple workspace reloads with VolarLabs?
+  const volarLabs = createLabsInfo(languageServerProtocol);
+
+  workspace.workspaceFolders?.forEach((folder) =>
+    addWorkspaceFolder(context, folder, fileWatcher, volarLabs)
+  );
   workspace.onDidChangeWorkspaceFolders(({ added, removed }) => {
     added.forEach((folder) => addWorkspaceFolder(context, folder, fileWatcher));
     removed.forEach((folder) => removeWorkspaceFolder(folder));
@@ -47,6 +59,8 @@ export function activate(context: ExtensionContext): void {
       reloadAllWorkspaces(context, fileWatcher);
     }
   });
+
+  return volarLabs.extensionExports;
 }
 
 export async function deactivate(): Promise<void> {
@@ -119,7 +133,10 @@ async function showDebugIR(editor: TextEditor): Promise<void> {
 ///////////////////////////////////////////////////////////////////////////////
 // Workspace folder management
 
-async function reloadAllWorkspaces(context: ExtensionContext, fileWatcher: FileSystemWatcher): Promise<void> {
+async function reloadAllWorkspaces(
+  context: ExtensionContext,
+  fileWatcher: FileSystemWatcher
+): Promise<void> {
   let folders = workspace.workspaceFolders ?? [];
 
   await Promise.all(
@@ -133,7 +150,8 @@ async function reloadAllWorkspaces(context: ExtensionContext, fileWatcher: FileS
 async function addWorkspaceFolder(
   context: ExtensionContext,
   workspaceFolder: WorkspaceFolder,
-  watcher: FileSystemWatcher
+  watcher: FileSystemWatcher,
+  volarLabs?: ReturnType<typeof createLabsInfo>
 ): Promise<void> {
   let folderPath = workspaceFolder.uri.fsPath;
   if (clients.has(folderPath)) return;
@@ -171,6 +189,11 @@ async function addWorkspaceFolder(
     documentSelector: [{ scheme: 'file', pattern: `${folderPath}/${filePattern}` }],
     synchronize: { fileEvents: watcher },
   });
+
+  if (volarLabs) {
+    // @ts-expect-error Not sure what LanguageClient can't be used as BaseLanguageClient
+    volarLabs.addLanguageClient(client);
+  }
 
   clients.set(folderPath, client);
 
