@@ -5,7 +5,7 @@ import {
   ShowMessageNotification,
   TextDocuments,
   DiagnosticSeverity,
-} from 'vscode-languageserver';
+} from '@volar/language-server';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import DocumentCache from '../common/document-cache.js';
 import { debounce } from '../common/scheduling.js';

@@ -7,7 +7,7 @@ import {
   TextDocumentSyncKind,
   CodeActionTriggerKind,
   CodeActionKind,
-} from 'vscode-languageserver';
+} from '@volar/language-server';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { GlintCompletionItem } from './glint-language-server.js';
 import { LanguageServerPool } from './pool.js';

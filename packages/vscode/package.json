@@ -97,9 +97,6 @@
     "color": "#1E293B",
     "theme": "dark"
   },
-  "dependencies": {
-    "vscode-languageclient": "^8.0.1"
-  },
   "devDependencies:notes": {
     "@vscode/test-electron": "Dropped support for Node < 16 in the 2.2.1 patch release, so locking to 2.2.0 while we still support Node 14."
   },

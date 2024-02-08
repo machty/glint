@@ -22,7 +22,7 @@ import {
   getTsdk,
 } from '@volar/vscode';
 
-import { Disposable, LanguageClient, ServerOptions } from 'vscode-languageclient/node.js';
+import { Disposable, LanguageClient, ServerOptions } from '@volar/vscode/node.js';
 import type { Request, GetIRRequest, SortImportsRequest } from '@glint/core/lsp-messages';
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -191,7 +191,6 @@ async function addWorkspaceFolder(
   });
 
   if (volarLabs) {
-    // @ts-expect-error Not sure what LanguageClient can't be used as BaseLanguageClient
     volarLabs.addLanguageClient(client);
   }
 
