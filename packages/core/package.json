@@ -41,13 +41,13 @@
     "vscode-languageserver-textdocument": "^1.0.5",
     "vscode-uri": "^3.0.8",
     "yargs": "^17.5.1",
-    "@volar/kit": "~2.0.2",
-    "@volar/language-core": "~2.0.2",
-    "@volar/language-server": "~2.0.2",
-    "@volar/language-service": "~2.0.2",
-    "@volar/source-map": "~2.0.2",
-    "@volar/typescript": "~2.0.2",
-    "volar-service-typescript": "0.0.28"
+    "@volar/kit": "~2.0.3",
+    "@volar/language-core": "~2.0.3",
+    "@volar/language-server": "~2.0.3",
+    "@volar/language-service": "~2.0.3",
+    "@volar/source-map": "~2.0.3",
+    "@volar/typescript": "~2.0.3",
+    "volar-service-typescript": "0.0.29"
   },
   "devDependencies": {
     "glint-monorepo-test-utils": "^1.4.0",
