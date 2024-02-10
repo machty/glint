@@ -19,7 +19,9 @@ export function createGtsLanguagePlugin(): LanguagePlugin {
   return {
     createVirtualCode(fileId, languageId, snapshot) {
       if (languageId === 'glimmer-ts') {
-        const filePath = fileId.replace('file://', '');
+        // TODO: are we using fileId correctly? Why did Volar standardize on file IDs rather
+        // than paths, and how can I get ri of these `replace()` hacks?
+        const filePath = fileId.replace('file://', '').replace('%40', '@');
         const glintConfig = loader.configForFile(filePath);
         assert(glintConfig, 'Glint config is missing');
         return new VirtualGtsCode(glintConfig, snapshot);
