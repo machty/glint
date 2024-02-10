@@ -4,26 +4,17 @@
 import { LanguagePlugin } from '@volar/language-core';
 import { VirtualGtsCode } from './gts-virtual-code.js';
 import type * as ts from 'typescript';
-import { loadConfig } from '../index.js';
-import { ConfigLoader } from '../config/loader.js';
+import { GlintConfig, loadConfig } from '../index.js';
 import { assert } from '../transform/util.js';
 export type TS = typeof ts;
 
 /**
  * Create a [Volar](https://volarjs.dev) language module to support GTS.
  */
-export function createGtsLanguagePlugin(): LanguagePlugin {
-
-  const loader = new ConfigLoader();
-
+export function createGtsLanguagePlugin(glintConfig: GlintConfig): LanguagePlugin {
   return {
     createVirtualCode(fileId, languageId, snapshot) {
       if (languageId === 'glimmer-ts') {
-        // TODO: are we using fileId correctly? Why did Volar standardize on file IDs rather
-        // than paths, and how can I get ri of these `replace()` hacks?
-        const filePath = fileId.replace('file://', '').replace('%40', '@');
-        const glintConfig = loader.configForFile(filePath);
-        assert(glintConfig, 'Glint config is missing');
         return new VirtualGtsCode(glintConfig, snapshot);
       }
     },

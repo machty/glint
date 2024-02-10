@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import * as path from 'node:path';
+
 // import {
 //   createMdxLanguagePlugin,
 //   createMdxServicePlugin,
@@ -18,6 +20,7 @@ import { create as createTypeScriptServicePlugin } from 'volar-service-typescrip
 import { createGtsServicePlugin } from './gts-service-plugin.js';
 import { createGtsLanguagePlugin } from './gts-language-plugin.js';
 import { assert } from '../transform/util.js';
+import { ConfigLoader } from '../config/loader.js';
 
 // process.title = 'mdx-language-server'
 
@@ -63,38 +66,24 @@ connection.onInitialize((parameters) =>
       const ts = server.modules.typescript;
       assert(ts, 'TypeScript module is missing');
 
-      // const configFileName = projectContext?.typescript?.configFileName;
+      const configFileName = projectContext?.typescript?.configFileName;
 
       // /** @type {PluggableList | undefined} */
       // let plugins
       // let checkMdx = false
       // let jsxImportSource = 'react'
 
-      // if (configFileName) {
-      //   const cwd = path.dirname(configFileName)
-      //   const configSourceFile = ts.readJsonConfigFile(
-      //     configFileName,
-      //     ts.sys.readFile
-      //   )
-      //   const commandLine = ts.parseJsonSourceFileConfigFileContent(
-      //     configSourceFile,
-      //     ts.sys,
-      //     cwd,
-      //     undefined,
-      //     configFileName
-      //   )
-      //   plugins = await resolveRemarkPlugins(
-      //     commandLine.raw?.mdx,
-      //     (name) =>
-      //       /** @type {Promise<Plugin>} */ (
-      //         loadPlugin(name, {prefix: 'remark', cwd})
-      //       )
-      //   )
-      //   checkMdx = Boolean(commandLine.raw?.mdx?.checkMdx)
-      //   jsxImportSource = commandLine.options.jsxImportSource || jsxImportSource
-      // }
+      const languagePlugins = [];
 
-      return [createGtsLanguagePlugin()];
+      if (configFileName) {
+        const cwd = path.dirname(configFileName)
+        const configLoader = new ConfigLoader();
+        const glintConfig = configLoader.configForFile(configFileName);
+        assert(glintConfig, 'Glint config is missing');
+        languagePlugins.unshift(createGtsLanguagePlugin(glintConfig));
+      }
+
+      return languagePlugins;
     },
   })
 );
