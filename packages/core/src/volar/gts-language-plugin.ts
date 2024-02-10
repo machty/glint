@@ -3,15 +3,26 @@
 // import {unified} from 'unified'
 import { LanguagePlugin } from '@volar/language-core';
 import { VirtualGtsCode } from './gts-virtual-code.js';
+import type * as ts from 'typescript';
+import { loadConfig } from '../index.js';
+import { ConfigLoader } from '../config/loader.js';
+import { assert } from '../transform/util.js';
+export type TS = typeof ts;
 
 /**
  * Create a [Volar](https://volarjs.dev) language module to support GTS.
  */
 export function createGtsLanguagePlugin(): LanguagePlugin {
+
+  const loader = new ConfigLoader();
+
   return {
     createVirtualCode(fileId, languageId, snapshot) {
       if (languageId === 'glimmer-ts') {
-        return new VirtualGtsCode(snapshot);
+        const filePath = fileId.replace('file://', '');
+        const glintConfig = loader.configForFile(filePath);
+        assert(glintConfig, 'Glint config is missing');
+        return new VirtualGtsCode(glintConfig, snapshot);
       }
     },
 

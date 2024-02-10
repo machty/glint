@@ -1,6 +1,10 @@
 import { CodeMapping, VirtualCode } from '@volar/language-core';
 import { IScriptSnapshot } from 'typescript';
 import { ScriptSnapshot } from './script-snapshot.js';
+import type * as ts from 'typescript';
+import { rewriteModule } from '../transform/index.js';
+import { GlintConfig } from '../index.js';
+export type TS = typeof ts;
 
 /**
  * A Volar virtual code that contains some additional metadata for MDX files.
@@ -28,7 +32,7 @@ export class VirtualGtsCode implements VirtualCode {
 
   mappings: CodeMapping[] = [];
 
-  constructor(snapshot: IScriptSnapshot) {
+  constructor(private glintConfig: GlintConfig, snapshot: IScriptSnapshot) {
     this.snapshot = snapshot;
     this.update(snapshot);
   }
@@ -59,39 +63,74 @@ export class VirtualGtsCode implements VirtualCode {
       },
     };
 
-    // Hack: for now, just test .gts files with no embedded template and see if it works.
-    this.embeddedCodes = [
-      {
-        embeddedCodes: [],
-        id: 'ts',
-        languageId: 'typescript',
-        mappings: [
-					// The Volar mapping that maps all TS syntax of the MDX file to the virtual TS file.
-					// So I think in the case of a Single-File-Component (1 <template> tag surrounded by TS),
-					// You'll end up with 2 entries in sourceOffets, representing before the <template> and after the </template>.
-          {
-            // sourceOffsets: [],
-            // generatedOffsets: [],
-            // lengths: [],
+    const contents = snapshot.getText(0, length);
 
-						// Hacked hardwired values for now.
-						sourceOffsets: [0],
-						generatedOffsets: [0],
-						lengths: [length],
-			
-            data: {
-              completion: true,
-              format: false,
-              navigation: true,
-              semantic: true,
-              structure: true,
-              verification: true,
+    let script = { filename: 'disregard.gts', contents };
+    let template = undefined;
+
+    // template is not specified for .gts files
+    // let template = templatePath
+    //   ? {
+    //       filename: templatePath,
+    //       contents: documents.getDocumentContents(templatePath, encoding),
+    //     }
+    //   : undefined;
+
+    // rewrite 
+    const transformedModule = rewriteModule(this.glintConfig.ts, { script, template }, this.glintConfig.environment);
+
+    if (transformedModule) {
+      // let a = null;
+      // let s = transformedModule.toDebugString();
+      // let b = 123;
+
+      this.embeddedCodes = [
+        {
+          embeddedCodes: [],
+          id: 'ts',
+          languageId: 'typescript',
+          mappings: transformedModule.toVolarMappings(),
+          snapshot: new ScriptSnapshot(transformedModule.transformedContents),
+        },
+      ];
+      let asd = null;
+    } else {
+      // Null transformed module means there's no embedded HBS templates,
+      // so just return a full "no-op" mapping from source to transformed.
+      this.embeddedCodes = [
+        {
+          embeddedCodes: [],
+          id: 'ts',
+          languageId: 'typescript',
+          mappings: [
+            // The Volar mapping that maps all TS syntax of the MDX file to the virtual TS file.
+            // So I think in the case of a Single-File-Component (1 <template> tag surrounded by TS),
+            // You'll end up with 2 entries in sourceOffets, representing before the <template> and after the </template>.
+            {
+              // sourceOffsets: [],
+              // generatedOffsets: [],
+              // lengths: [],
+  
+              // Hacked hardwired values for now.
+              sourceOffsets: [0],
+              generatedOffsets: [0],
+              lengths: [length],
+  
+              data: {
+                completion: true,
+                format: false,
+                navigation: true,
+                semantic: true,
+                structure: true,
+                verification: true,
+              },
             },
-          },
-        ],
-        snapshot: new ScriptSnapshot(snapshot.getText(0, length)),
-      },
-    ];
+          ],
+          snapshot: new ScriptSnapshot(contents),
+        },
+      ];
+    }
+
 
     // const gts = snapshot.getText(0, length);
 

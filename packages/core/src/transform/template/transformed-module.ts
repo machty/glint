@@ -216,4 +216,52 @@ export default class TransformedModule {
 
     assert(false, 'Internal error: offset out of bounds');
   }
+
+  public toVolarMappings() {
+    const sourceOffsets: number[] = [];
+    const generatedOffsets: number[] = [];
+    const lengths: number[] = [];
+
+    this.correlatedSpans.forEach((span) => {
+      if (span.mapping) {
+        // this span is transformation from embedded <template> to TS.
+        sourceOffsets.push(span.originalStart);
+        generatedOffsets.push(span.transformedStart);
+        lengths.push(0);
+
+        // TODO: figure out what equal source-dest spans can be mapped to each other.
+      } else {
+        // untransformed TS code (between <template> tags)
+        assert(
+          span.originalLength === span.transformedLength,
+          'span length mismatch for untransformed content'
+        );
+        sourceOffsets.push(span.originalStart);
+        generatedOffsets.push(span.transformedStart);
+        lengths.push(span.originalLength);
+      }
+    });
+
+    return [
+      {
+        // sourceOffsets: [],
+        // generatedOffsets: [],
+        // lengths: [],
+
+        // Hacked hardwired values for now.
+        sourceOffsets,
+        generatedOffsets,
+        lengths,
+
+        data: {
+          completion: true,
+          format: false,
+          navigation: true,
+          semantic: true,
+          structure: true,
+          verification: true,
+        },
+      },
+    ];
+  }
 }
