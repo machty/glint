@@ -222,16 +222,41 @@ export default class TransformedModule {
     const generatedOffsets: number[] = [];
     const lengths: number[] = [];
 
+    let eachLeafMapping = (mapping: MappingTree, callback: (m: MappingTree) => void) => {
+      const children = mapping.children;
+      if (children.length === 0) {
+        callback(mapping);
+      } else {
+        mapping.children.forEach((child) => {
+          eachLeafMapping(child, callback);
+        });
+      }
+    };
+
     this.correlatedSpans.forEach((span) => {
       if (span.mapping) {
         // this span is transformation from embedded <template> to TS.
-        sourceOffsets.push(span.originalStart);
-        generatedOffsets.push(span.transformedStart);
-        lengths.push(0);
 
-        // TODO: figure out what equal source-dest spans can be mapped to each other.
+        eachLeafMapping(span.mapping, (mapping) => {
+          let { originalRange, transformedRange } = mapping;
+          let hbsStart = span.originalStart + originalRange.start;
+          let hbsEnd = span.originalStart + originalRange.end;
+          let tsStart = span.transformedStart + transformedRange.start;
+          let tsEnd = span.transformedStart + transformedRange.end;
+          const length = hbsEnd - hbsStart;
+          // assert(length === tsEnd - tsStart, 'span length mismatch for leaf mapping');
+          if (length === tsEnd - tsStart) {
+            // (Hacky?) assumption: because TS and HBS span lengths are equivalent,
+            // then this is a simple leafmost
+            sourceOffsets.push(hbsStart);
+            generatedOffsets.push(tsStart);
+            lengths.push(length);
+          }
+        });
       } else {
-        // untransformed TS code (between <template> tags)
+        // untransformed TS code (between <template> tags). Because there's no
+        // transformation, we expect these to be the same length (in fact, they
+        // should be the same string entirely)
         assert(
           span.originalLength === span.transformedLength,
           'span length mismatch for untransformed content'
