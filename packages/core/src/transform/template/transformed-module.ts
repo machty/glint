@@ -247,7 +247,7 @@ export default class TransformedModule {
           // assert(length === tsEnd - tsStart, 'span length mismatch for leaf mapping');
           if (length === tsEnd - tsStart) {
             // (Hacky?) assumption: because TS and HBS span lengths are equivalent,
-            // then this is a simple leafmost
+            // then this is a simple leafmost mapping, e.g. `{{this.[foo]}}` -> `this.[foo]`
             sourceOffsets.push(hbsStart);
             generatedOffsets.push(tsStart);
             lengths.push(length);
