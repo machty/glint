@@ -6,7 +6,6 @@ import {
   createTypeScriptProjectProvider,
 } from '@volar/language-server/node.js';
 import { create as createTypeScriptServicePlugin } from 'volar-service-typescript';
-import { createGtsServicePlugin } from './gts-service-plugin.js';
 import { createGtsLanguagePlugin } from './gts-language-plugin.js';
 import { assert } from '../transform/util.js';
 import { ConfigLoader } from '../config/loader.js';
@@ -24,31 +23,22 @@ connection.onInitialize((parameters) =>
       // 'ts',
     ],
 
+    // Return the service plugins required/used by our language server. Service plugins provide
+    // functionality for a single file/language type. For example, we use Volar's TypeScript service
+    // for type-checking our .gts/.gjs files, but .gts/.gjs files are actually two separate languages
+    // (TS + Handlebars) combined into one, but we can use the TS language service because the only
+    // scripts we pass to the TS service for type-checking is transformed Intermediate Representation (IR)
+    // TypeScript code with all <template> tags converted to type-checkable TS.
     getServicePlugins() {
       assert(server.modules.typescript, 'TypeScript module is missing');
 
-      // What is the difference between a createMdxServicePlugin and a createMdxLanguagePlugin?
-
-      // Example of how these are used:
-      // When requesting completions from the server, Volar loops through each service (in provideCompletionItems.ts)
-      // to see if it defines `provideCompletionItems`. If so, it calls that hook and returns the results.
-      //
-      // In our case, the GTS service, i think, should not provide TS completions; rather, the TS service should provide
-      // TS completions for the Immediate Representation of the GTS file.
-      //
-      // Services only operate on a single language; a .gts file is actually a file type with two embedded languages: TS + Handlebars.
-      // So the way to think about it is we use the GTS LanguagePlugin to parse the .gts file into a VirtualGtsCode
       return [
-        // Disabling GTS service for now because for the purposes of type-checking, I don't
-        // thing we need to use the GTS service; rather, we use the GTS language plugin to parse
-        // out the embedded codes, generate a TS IR file, and then use the pre-existing TS language
-        // service to parse that.
-        // createGtsServicePlugin(),
         createTypeScriptServicePlugin(server.modules.typescript),
       ];
     },
 
-    async getLanguagePlugins(serviceEnvironment, projectContext) {
+    // Return the language plugins required/used by our language server. Language Plugins 
+    async getLanguagePlugins(_serviceEnvironment, projectContext) {
       const ts = server.modules.typescript;
       assert(ts, 'TypeScript module is missing');
 
@@ -56,8 +46,10 @@ connection.onInitialize((parameters) =>
 
       const languagePlugins = [];
 
+      // I don't remember why but there are some contexts where a configFileName is not known,
+      // in which case we cannot fully activate all of the language plugins.
       if (configFileName) {
-        // Maybe move ConfigLoader higher up so we can reuse it between calls to  `getLanguagePlugins`? That said,
+        // TODO: Maybe move ConfigLoader higher up so we can reuse it between calls to  `getLanguagePlugins`? That said,
         // Volar takes care of a lot of the same group-by-tsconfig caching that ConfigLoader does,
         // so it might not buy us much value any more.
         const configLoader = new ConfigLoader();
