@@ -1,31 +1,16 @@
 #!/usr/bin/env node
 
-import * as path from 'node:path';
-
-// import {
-//   createMdxLanguagePlugin,
-//   createMdxServicePlugin,
-//   resolveRemarkPlugins
-// } from '@mdx-js/language-service'
 import {
   createConnection,
   createServer,
   createTypeScriptProjectProvider,
 } from '@volar/language-server/node.js';
-// import {loadPlugin} from 'load-plugin'
-// import remarkFrontmatter from 'remark-frontmatter'
-// import remarkGfm from 'remark-gfm'
-// import {create as createMarkdownServicePlugin} from 'volar-service-markdown'
 import { create as createTypeScriptServicePlugin } from 'volar-service-typescript';
 import { createGtsServicePlugin } from './gts-service-plugin.js';
 import { createGtsLanguagePlugin } from './gts-language-plugin.js';
 import { assert } from '../transform/util.js';
 import { ConfigLoader } from '../config/loader.js';
 
-// process.title = 'mdx-language-server'
-
-/** @type {PluggableList} */
-// const defaultPlugins = [[remarkFrontmatter, ['toml', 'yaml']], remarkGfm];
 const connection = createConnection();
 const server = createServer(connection);
 
@@ -68,15 +53,9 @@ connection.onInitialize((parameters) =>
 
       const configFileName = projectContext?.typescript?.configFileName;
 
-      // /** @type {PluggableList | undefined} */
-      // let plugins
-      // let checkMdx = false
-      // let jsxImportSource = 'react'
-
       const languagePlugins = [];
 
       if (configFileName) {
-        const cwd = path.dirname(configFileName)
         const configLoader = new ConfigLoader();
         const glintConfig = configLoader.configForFile(configFileName);
         assert(glintConfig, 'Glint config is missing');
