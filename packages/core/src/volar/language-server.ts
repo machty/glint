@@ -19,6 +19,7 @@ connection.onInitialize((parameters) =>
     watchFileExtensions: [
       // 'js',
       // 'ts',
+      'gjs',
       'gts',
       // 'ts',
     ],
@@ -56,6 +57,9 @@ connection.onInitialize((parameters) =>
       const languagePlugins = [];
 
       if (configFileName) {
+        // Maybe move ConfigLoader higher up so we can reuse it between calls to  `getLanguagePlugins`? That said,
+        // Volar takes care of a lot of the same group-by-tsconfig caching that ConfigLoader does,
+        // so it might not buy us much value any more.
         const configLoader = new ConfigLoader();
         const glintConfig = configLoader.configForFile(configFileName);
         assert(glintConfig, 'Glint config is missing');

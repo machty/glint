@@ -10,8 +10,6 @@ export type TS = typeof ts;
  * A Volar virtual code that contains some additional metadata for MDX files.
  */
 export class VirtualGtsCode implements VirtualCode {
-  snapshot: IScriptSnapshot;
-
   /**
    * The virtual files embedded in the GTS file. (such as <template>)
    */
@@ -22,18 +20,13 @@ export class VirtualGtsCode implements VirtualCode {
    */
   id = 'gts';
 
-  /**
-   * The language ID.
-   */
-  // languageId = 'gts';
-  // Where does glimmer-ts come from? The VSCode glimmer addon?
-  // TODO: see what happens when we disable that addon.
-  languageId = 'glimmer-ts';
-
   mappings: CodeMapping[] = [];
 
-  constructor(private glintConfig: GlintConfig, snapshot: IScriptSnapshot) {
-    this.snapshot = snapshot;
+  constructor(
+    private glintConfig: GlintConfig,
+    public snapshot: IScriptSnapshot,
+    public languageId: 'glimmer-ts' | 'glimmer-js'
+  ) {
     this.update(snapshot);
   }
 
@@ -76,8 +69,12 @@ export class VirtualGtsCode implements VirtualCode {
     //     }
     //   : undefined;
 
-    // rewrite 
-    const transformedModule = rewriteModule(this.glintConfig.ts, { script, template }, this.glintConfig.environment);
+    // rewrite
+    const transformedModule = rewriteModule(
+      this.glintConfig.ts,
+      { script, template },
+      this.glintConfig.environment
+    );
 
     if (transformedModule) {
       // let a = null;
@@ -110,12 +107,12 @@ export class VirtualGtsCode implements VirtualCode {
               // sourceOffsets: [],
               // generatedOffsets: [],
               // lengths: [],
-  
+
               // Hacked hardwired values for now.
               sourceOffsets: [0],
               generatedOffsets: [0],
               lengths: [length],
-  
+
               data: {
                 completion: true,
                 format: false,
@@ -130,7 +127,6 @@ export class VirtualGtsCode implements VirtualCode {
         },
       ];
     }
-
 
     // const gts = snapshot.getText(0, length);
 

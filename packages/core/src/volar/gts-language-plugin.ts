@@ -14,8 +14,8 @@ export type TS = typeof ts;
 export function createGtsLanguagePlugin(glintConfig: GlintConfig): LanguagePlugin {
   return {
     createVirtualCode(fileId, languageId, snapshot) {
-      if (languageId === 'glimmer-ts') {
-        return new VirtualGtsCode(glintConfig, snapshot);
+      if (languageId === 'glimmer-ts' || languageId === 'glimmer-js') {
+        return new VirtualGtsCode(glintConfig, snapshot, languageId);
       }
     },
 
@@ -25,15 +25,35 @@ export function createGtsLanguagePlugin(glintConfig: GlintConfig): LanguagePlugi
     },
 
     typescript: {
-      extraFileExtensions: [{ extension: 'gts', isMixedContent: true, scriptKind: 7 }],
+      extraFileExtensions: [
+        { extension: 'gts', isMixedContent: true, scriptKind: 7 },
+        { extension: 'gjs', isMixedContent: true, scriptKind: 7 },
+      ],
 
+      // This is called when TS requests the file that we'll be typechecking, which in our case
+      // is the transformed Intermediate Representation of ths .gts with the <template> tags
+      // converted to type-checkable TS.
       getScript(rootVirtualCode) {
-        return {
-          // hacky: assuming that the first embeddedCode is TS IR
-          code: rootVirtualCode.embeddedCodes[0],
-          extension: '.ts',
-          scriptKind: 3, // TS
-        };
+        // The first embeddedCode is always the TS Intermediate Representation code
+        const transformedCode = rootVirtualCode.embeddedCodes[0];
+
+        switch (rootVirtualCode.languageId) {
+          case 'glimmer-ts':
+            return {
+              code: transformedCode,
+              extension: '.ts',
+              scriptKind: 3, // TS
+            };
+          case 'glimmer-js':
+            return {
+              // The first embeddedCode is always the TS Intermediate Representation code
+              code: transformedCode,
+              extension: '.js',
+              scriptKind: 1, // JS
+            };
+          default:
+            throw new Error(`getScript: Unexpected languageId: ${rootVirtualCode.languageId}`);
+        }
       },
 
       resolveLanguageServiceHost(host) {
