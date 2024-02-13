@@ -417,10 +417,11 @@ export default class TransformManager {
     }
 
     let transformedModule: TransformedModule | null = null;
-    if (environment.isScript(filename) && glintConfig.includesFile(filename)) { // if file (e.g. foo.ts) is script and glintConfig has registered extensions matching file
+    if (environment.isScript(filename) && glintConfig.includesFile(filename)) {
+      // if file (e.g. foo.ts) is script and glintConfig has registered extensions matching file
       if (documents.documentExists(filename)) {
         let contents = documents.getDocumentContents(filename, encoding); // filename is ember-component.ts
-        let templatePath = documents.getCompanionDocumentPath(filename);  // templatePath is ember-component.hbs
+        let templatePath = documents.getCompanionDocumentPath(filename); // templatePath is ember-component.hbs
         let canonicalPath = documents.getCanonicalDocumentPath(filename); // same as filename (ember-component.ts)
         let mayHaveEmbeds = environment.moduleMayHaveEmbeddedTemplates(canonicalPath, contents);
 
@@ -435,7 +436,8 @@ export default class TransformManager {
 
           transformedModule = rewriteModule(this.ts, { script, template }, environment); // rewrite .ts to have embedded .hbs file
         }
-      } else { // i don't know... this isn't a real file?
+      } else {
+        // i don't know... this isn't a real file?
         let templatePath = templatePathForSynthesizedModule(filename);
         if (
           documents.documentExists(templatePath) &&

@@ -20,6 +20,7 @@ connection.onInitialize((parameters) =>
       // 'ts',
       'gjs',
       'gts',
+      'hbs',
       // 'ts',
     ],
 

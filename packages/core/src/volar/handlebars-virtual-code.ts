@@ -7,26 +7,32 @@ import { GlintConfig } from '../index.js';
 export type TS = typeof ts;
 
 /**
- * A Volar virtual code that contains some additional metadata for MDX files.
+ * A Volar virtual code that contains some additional metadata for .hbs files.
+ *
+ * When the editor opens an .hbs file it'll request a virtual file to be created
+ * for it. The scheme we use is:
+ *
+ * 1. Look for corresponding .js/.ts backing class, which might be:
+ * - component
+ * - route
+ * - controller ???
  */
-export class VirtualGtsCode implements VirtualCode {
+export class VirtualHandlebarsCode implements VirtualCode {
   /**
-   * The virtual files embedded in the GTS file. (such as <template>)
+   * For .hbs file, the embeddedCodes are the combined
    */
   embeddedCodes: VirtualCode<string>[] = [];
 
   /**
    * The file ID.
    */
-  id = 'gts';
+  id = 'hbs';
 
   mappings: CodeMapping[] = [];
 
-  constructor(
-    private glintConfig: GlintConfig,
-    public snapshot: IScriptSnapshot,
-    public languageId: 'glimmer-ts' | 'glimmer-js'
-  ) {
+  languageId = 'handlebars';
+
+  constructor(private glintConfig: GlintConfig, public snapshot: IScriptSnapshot) {
     this.update(snapshot);
   }
 
@@ -36,12 +42,7 @@ export class VirtualGtsCode implements VirtualCode {
     this.snapshot = snapshot;
     const length = snapshot.getLength();
 
-    // Define a single mapping for the root virtual code (the .gts file).
-    // The original MDX docs describe the root virtual code mappings are as:
-    //
-    // > The code mappings of the MDX file. There is always only one mapping.
-    //
-    // I guess it's some "identity" mapping that describes the whole file? I don't know.
+    // Define a single mapping for the root virtual code (the untransformed .hbs file).
     this.mappings[0] = {
       sourceOffsets: [0],
       generatedOffsets: [0],
@@ -58,8 +59,15 @@ export class VirtualGtsCode implements VirtualCode {
 
     const contents = snapshot.getText(0, length);
 
-    let script = { filename: 'disregard.gts', contents };
-    let template = undefined;
+    // The script we were asked for doesn't exist, but a corresponding template does, and
+    // it doesn't have a companion script elsewhere.
+    // We default to just `export {}` to reassure TypeScript that this is definitely a module
+    // TODO: this `export {}` is falsely mapping (see in Volar Labs), not sure what impact / solution is.
+    let script = { filename: "disregard.ts", contents: 'export {}' };
+    let template = {
+      filename: "disregard.hbs",
+      contents,
+    };
 
     const transformedModule = rewriteModule(
       this.glintConfig.ts,
@@ -90,10 +98,6 @@ export class VirtualGtsCode implements VirtualCode {
             // So I think in the case of a Single-File-Component (1 <template> tag surrounded by TS),
             // You'll end up with 2 entries in sourceOffets, representing before the <template> and after the </template>.
             {
-              // sourceOffsets: [],
-              // generatedOffsets: [],
-              // lengths: [],
-
               // Hacked hardwired values for now.
               sourceOffsets: [0],
               generatedOffsets: [0],

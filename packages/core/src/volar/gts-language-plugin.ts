@@ -6,6 +6,7 @@ import { VirtualGtsCode } from './gts-virtual-code.js';
 import type * as ts from 'typescript';
 import { GlintConfig, loadConfig } from '../index.js';
 import { assert } from '../transform/util.js';
+import { VirtualHandlebarsCode } from './handlebars-virtual-code.js';
 export type TS = typeof ts;
 
 /**
@@ -14,6 +15,11 @@ export type TS = typeof ts;
 export function createGtsLanguagePlugin(glintConfig: GlintConfig): LanguagePlugin {
   return {
     createVirtualCode(fileId, languageId, snapshot) {
+      // TODO: won't we need to point the TS component code to the same thing?
+      if (languageId === 'handlebars') {
+        return new VirtualHandlebarsCode(glintConfig, snapshot);
+      }
+
       if (languageId === 'glimmer-ts' || languageId === 'glimmer-js') {
         return new VirtualGtsCode(glintConfig, snapshot, languageId);
       }
@@ -28,6 +34,7 @@ export function createGtsLanguagePlugin(glintConfig: GlintConfig): LanguagePlugi
       extraFileExtensions: [
         { extension: 'gts', isMixedContent: true, scriptKind: 7 },
         { extension: 'gjs', isMixedContent: true, scriptKind: 7 },
+        { extension: 'hbs', isMixedContent: true, scriptKind: 7 },
       ],
 
       // This is called when TS requests the file that we'll be typechecking, which in our case
@@ -50,6 +57,13 @@ export function createGtsLanguagePlugin(glintConfig: GlintConfig): LanguagePlugi
               code: transformedCode,
               extension: '.js',
               scriptKind: 1, // JS
+            };
+          case 'handlebars':
+            // TODO: companion file might be .js? Not sure if this is right
+            return {
+              code: transformedCode,
+              extension: '.ts',
+              scriptKind: 3, // TS
             };
           default:
             throw new Error(`getScript: Unexpected languageId: ${rootVirtualCode.languageId}`);

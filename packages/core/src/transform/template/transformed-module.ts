@@ -257,13 +257,21 @@ export default class TransformedModule {
         // untransformed TS code (between <template> tags). Because there's no
         // transformation, we expect these to be the same length (in fact, they
         // should be the same string entirely)
-        assert(
-          span.originalLength === span.transformedLength,
-          'span length mismatch for untransformed content'
-        );
-        sourceOffsets.push(span.originalStart);
-        generatedOffsets.push(span.transformedStart);
-        lengths.push(span.originalLength);
+
+
+        // This assertion seemed valid when parsing .gts files with extracted hbs in <template> tags,
+        // but when parsing solo .hbs files in loose mode there were cases where, e.g.,
+        // originalLength == 0 and transformLength == 1;
+        // assert(
+        //   span.originalLength === span.transformedLength,
+        //   'span length mismatch for untransformed content'
+        // );
+
+        if (span.originalLength === span.transformedLength) {
+          sourceOffsets.push(span.originalStart);
+          generatedOffsets.push(span.transformedStart);
+          lengths.push(span.originalLength);
+        }
       }
     });
 
