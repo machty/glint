@@ -24,7 +24,7 @@ export class VirtualHandlebarsCode implements VirtualCode {
   embeddedCodes: VirtualCode<string>[] = [];
 
   /**
-   * The file ID.
+   * The id is a unique (within the VirtualCode and its embedded files) id for Volar to identify it. It could be any string.
    */
   id = 'hbs';
 
@@ -63,9 +63,9 @@ export class VirtualHandlebarsCode implements VirtualCode {
     // it doesn't have a companion script elsewhere.
     // We default to just `export {}` to reassure TypeScript that this is definitely a module
     // TODO: this `export {}` is falsely mapping (see in Volar Labs), not sure what impact / solution is.
-    let script = { filename: "disregard.ts", contents: 'export {}' };
+    let script = { filename: 'disregard.ts', contents: 'export {}' };
     let template = {
-      filename: "disregard.hbs",
+      filename: 'disregard.hbs',
       contents,
     };
 
