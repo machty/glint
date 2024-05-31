@@ -200,7 +200,7 @@ export default class GlintLanguageServer {
         if (!file || file.fileName !== filePath) return [];
 
         return {
-          source: 'ts', // previously 'ts'
+          source: 'glint',
           code: diagnostic.code,
           severity: severityForDiagnostic(this.ts, diagnostic),
           message: this.ts.flattenDiagnosticMessageText(messageText, '\n'),

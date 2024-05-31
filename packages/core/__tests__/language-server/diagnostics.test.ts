@@ -121,7 +121,7 @@ describe('Language Server: Diagnostics', () => {
       expect(diagnostics).toMatchObject([
         {
           message: "Property 'foo' does not exist on type '{}'.",
-          source: 'ts', // previously 'ts'
+          source: 'glint',
           code: 2339,
         },
       ]);
@@ -163,7 +163,7 @@ describe('Language Server: Diagnostics', () => {
       expect(diagnostics).toMatchObject([
         {
           message: "Property 'foo' does not exist on type '{}'.",
-          source: 'ts', // previously 'ts'
+          source: 'glint',
           code: 2339,
         },
       ]);
