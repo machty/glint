@@ -39,14 +39,14 @@ connection.onInitialize((parameters) => {
   );
   return server.initialize(
     parameters,
+    project,
     // Return the service plugins required/used by our language server. Service plugins provide
     // functionality for a single file/language type. For example, we use Volar's TypeScript service
     // for type-checking our .gts/.gjs files, but .gts/.gjs files are actually two separate languages
     // (TS + Handlebars) combined into one, but we can use the TS language service because the only
     // scripts we pass to the TS service for type-checking is transformed Intermediate Representation (IR)
     // TypeScript code with all <template> tags converted to type-checkable TS.
-    createTypeScriptServicePlugins(ts),
-    project
+    createTypeScriptServicePlugins(ts)
   )
 });
 
@@ -72,14 +72,14 @@ connection.onInitialize((parameters) => {
 
 connection.onInitialized(() => {
   server.initialized();
-  server.watchFiles([
+  server.watchFiles(['**/*.{' + [
     // 'js',
     // 'ts',
     'gjs',
     'gts',
     'hbs',
     // 'ts',
-  ])
+  ].join(',') + '}']);
 });
 
 connection.listen();
